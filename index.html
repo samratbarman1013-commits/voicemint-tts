@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>VoiceMint — Text to Speech Studio</title>
+<meta name="description" content="Paste any text and turn it into a natural, human-like voice. Download as MP3 or WAV. 11 languages, 30+ voices." />
+<style>
+  :root{
+    --bg:#0b0f1a; --card:#121a2b; --card2:#0e1524;
+    --line:#223052; --txt:#e8edf7; --muted:#93a1c0;
+    --accent:#7c5cff; --accent2:#00d4a7; --danger:#ff6b6b;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:'Segoe UI',system-ui,-apple-system,Roboto,Arial,sans-serif;
+    background:
+      radial-gradient(1200px 600px at 10% -10%, rgba(124,92,255,.25), transparent 60%),
+      radial-gradient(900px 500px at 110% 20%, rgba(0,212,167,.18), transparent 60%),
+      var(--bg);
+    color:var(--txt); min-height:100vh; padding:28px 16px 60px;
+  }
+  .wrap{max-width:860px;margin:0 auto}
+  header{text-align:center;margin-bottom:28px}
+  .logo{font-size:2rem;font-weight:800;letter-spacing:.5px;
+    background:linear-gradient(90deg,#a08cff,#00d4a7);-webkit-background-clip:text;background-clip:text;color:transparent}
+  .tag{color:var(--muted);margin-top:6px;font-size:1.02rem}
+  .card{
+    background:linear-gradient(180deg,var(--card),var(--card2));
+    border:1px solid var(--line); border-radius:18px;
+    padding:22px; box-shadow:0 18px 50px rgba(0,0,0,.45);
+  }
+  label{display:block;font-size:.85rem;font-weight:600;color:var(--muted);margin:14px 0 6px;text-transform:uppercase;letter-spacing:.6px}
+  textarea{
+    width:100%;min-height:160px;resize:vertical;
+    background:#0a101d;border:1px solid var(--line);border-radius:12px;
+    color:var(--txt);padding:14px;font-size:1.05rem;line-height:1.55;font-family:inherit;
+  }
+  textarea:focus,input:focus,select:focus{outline:2px solid var(--accent);border-color:transparent}
+  .counter{ text-align:right;font-size:.8rem;color:var(--muted);margin-top:4px }
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  @media(max-width:640px){.grid{grid-template-columns:1fr}}
+  select,input[type=password]{
+    width:100%;background:#0a101d;border:1px solid var(--line);border-radius:10px;
+    color:var(--txt);padding:11px 12px;font-size:.98rem;font-family:inherit;
+  }
+  .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+  .pace-wrap{flex:1;min-width:220px}
+  input[type=range]{width:100%;accent-color:var(--accent);margin-top:10px}
+  .pace-val{color:var(--accent2);font-weight:700}
+  .btn{
+    border:none;border-radius:12px;padding:14px 26px;font-size:1.05rem;font-weight:700;
+    cursor:pointer;font-family:inherit;transition:transform .12s ease, box-shadow .12s ease;
+  }
+  .btn-primary{
+    width:100%;margin-top:22px;color:#fff;font-size:1.15rem;
+    background:linear-gradient(90deg,var(--accent),#5a8dff);
+    box-shadow:0 10px 30px rgba(124,92,255,.4);
+  }
+  .btn-primary:hover{transform:translateY(-2px)}
+  .btn-primary:disabled{opacity:.55;cursor:not-allowed;transform:none}
+  .btn-dl{
+    color:#04241c;background:linear-gradient(90deg,#00e0b0,#00b289);
+    box-shadow:0 8px 24px rgba(0,212,167,.3);font-size:1rem;padding:12px 20px;
+  }
+  .btn-ghost{
+    background:transparent;border:1px solid var(--line);color:var(--txt);font-size:1rem;padding:12px 20px;
+  }
+  .keybox{background:rgba(124,92,255,.08);border:1px dashed #3b2f7a;border-radius:12px;padding:14px;margin-top:20px}
+  .keybox summary{cursor:pointer;font-weight:700;color:#c3b3ff}
+  .keybox .hint{color:var(--muted);font-size:.88rem;margin:8px 0 10px}
+  .keybox a{color:var(--accent2)}
+  .msg{margin-top:16px;border-radius:10px;padding:12px 14px;font-size:.95rem;display:none}
+  .msg.err{display:block;background:rgba(255,107,107,.12);border:1px solid #6e2f2f;color:#ffb3b3}
+  .msg.ok{display:block;background:rgba(0,212,167,.1);border:1px solid #1e5f50;color:#9df0dc}
+  #result{display:none;margin-top:24px;border-top:1px solid var(--line);padding-top:22px}
+  audio{width:100%;margin:14px 0 18px;border-radius:10px}
+  .spinner{display:inline-block;width:18px;height:18px;border:3px solid rgba(255,255,255,.3);
+    border-top-color:#fff;border-radius:50%;animation:spin .8s linear infinite;vertical-align:-4px;margin-right:8px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  footer{text-align:center;color:#5d6a89;font-size:.82rem;margin-top:34px;line-height:1.7}
+  .chip{display:inline-block;background:#0a101d;border:1px solid var(--line);border-radius:99px;
+    padding:4px 12px;font-size:.78rem;color:var(--muted);margin:3px 4px 0 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">🎙️ VoiceMint</div>
+    <p class="tag">Paste your text → get a natural, human-like voice → download as MP3 or WAV</p>
+    <span class="chip">30+ realistic voices</span>
+    <span class="chip">11 languages</span>
+    <span class="chip">MP3 · WAV</span>
+    <span class="chip">Runs fully in your browser</span>
+  </header>
+
+  <div class="card">
+    <label for="text">Your text</label>
+    <textarea id="text" placeholder="Paste or type anything here… e.g. Welcome to VoiceMint! Paste any text, choose a voice you like, and download the audio as an MP3 file."></textarea>
+    <div class="counter"><span id="cCount">0</span> / 2500 characters</div>
+
+    <div class="grid" style="margin-top:8px">
+      <div>
+        <label for="lang">Language</label>
+        <select id="lang"></select>
+      </div>
+      <div>
+        <label for="voice">Voice</label>
+        <select id="voice"></select>
+      </div>
+    </div>
+
+    <div class="row" style="margin-top:14px">
+      <div class="pace-wrap">
+        <label for="pace">Speaking pace — <span class="pace-val" id="paceVal">1.0×</span></label>
+        <input type="range" id="pace" min="0.5" max="2" step="0.1" value="1" />
+      </div>
+      <div style="flex:1;min-width:150px">
+        <label for="fmt">Download format</label>
+        <select id="fmt">
+          <option value="mp3" selected>MP3</option>
+          <option value="wav">WAV</option>
+        </select>
+      </div>
+      <div style="flex:1;min-width:150px">
+        <label for="rate">Audio quality</label>
+        <select id="rate">
+          <option value="24000">24 kHz (default)</option>
+          <option value="44100">44.1 kHz (CD)</option>
+          <option value="48000">48 kHz (studio)</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="btn btn-primary" id="goBtn">🎤 Generate Voice</button>
+
+    <div class="msg" id="msg"></div>
+
+    <div id="result">
+      <label>Your audio</label>
+      <audio id="player" controls></audio>
+      <div class="row">
+        <button class="btn btn-dl" id="dlBtn">⬇️ Download MP3</button>
+        <button class="btn btn-ghost" id="againBtn">🔁 Generate again</button>
+      </div>
+    </div>
+  </div>
+
+  <details class="keybox card" id="keyDetails">
+    <summary>🔑 API key (needed once — click to set up)</summary>
+    <p class="hint">
+      VoiceMint uses <b>Sarvam AI Bulbul v3</b>, one of the most natural text-to-speech engines for Indian and English voices.
+      Grab a <b>free API key</b> at <a href="https://dashboard.sarvam.ai" target="_blank" rel="noopener">dashboard.sarvam.ai</a>
+      (sign up → API Keys → copy). Paste it below — it is stored <b>only in your browser</b> (localStorage) and is never sent anywhere except Sarvam's official API.
+    </p>
+    <input type="password" id="apiKey" placeholder="Paste your Sarvam API key here…" />
+  </details>
+
+  <footer>
+    VoiceMint · Text-to-Speech studio powered by Sarvam AI Bulbul v3 · 30+ human-like voices in
+    Hindi, English (India), Bengali, Gujarati, Kannada, Malayalam, Marathi, Odia, Punjabi, Tamil &amp; Telugu.
+  </footer>
+</div>
+
+<script>
+const LANGS = [
+  ["en-IN","English (India)"],["hi-IN","हिन्दी Hindi"],["bn-IN","বাংলা Bengali"],
+  ["gu-IN","ગુજરાતી Gujarati"],["kn-IN","ಕನ್ನಡ Kannada"],["ml-IN","മലയാളം Malayalam"],
+  ["mr-IN","मराठी Marathi"],["od-IN","ଓଡ଼ିଆ Odia"],["pa-IN","ਪੰਜਾਬੀ Punjabi"],
+  ["ta-IN","தமிழ் Tamil"],["te-IN","తెలుగు Telugu"]
+];
+const VOICES = [
+  ["shubh","Shubh · warm male (default)"],["aditya","Aditya · male"],["rohan","Rohan · male"],
+  ["rahul","Rahul · male"],["amit","Amit · male"],["dev","Dev · male"],["ratan","Ratan · male"],
+  ["varun","Varun · male"],["manan","Manan · male"],["sumit","Sumit · male"],["kabir","Kabir · male"],
+  ["aayan","Aayan · male"],["ashutosh","Ashutosh · male"],["advait","Advait · male"],
+  ["anand","Anand · male"],["tarun","Tarun · male"],["sunny","Sunny · male"],["mani","Mani · male"],
+  ["gokul","Gokul · male"],["vijay","Vijay · male"],["rehan","Rehan · male"],["soham","Soham · male"],
+  ["ritu","Ritu · female"],["priya","Priya · female"],["neha","Neha · female"],["pooja","Pooja · female"],
+  ["simran","Simran · female"],["kavya","Kavya · female"],["ishita","Ishita · female"],
+  ["shreya","Shreya · female"],["roopa","Roopa · female"],["tanya","Tanya · female"],
+  ["shruti","Shruti · female"],["suhani","Suhani · female"],["mohit","Mohit · female"],
+  ["kavitha","Kavitha · female"],["rupali","Rupali · female"]
+];
+
+const $ = id => document.getElementById(id);
+const textEl=$("text"), langEl=$("lang"), voiceEl=$("voice"), paceEl=$("pace"),
+      paceVal=$("paceVal"), fmtEl=$("fmt"), rateEl=$("rate"), goBtn=$("goBtn"),
+      msgEl=$("msg"), resultEl=$("result"), player=$("player"), dlBtn=$("dlBtn"),
+      againBtn=$("againBtn"), keyEl=$("apiKey"), keyDetails=$("keyDetails"), cCount=$("cCount");
+
+LANGS.forEach(([v,t])=>langEl.add(new Option(t,v)));
+VOICES.forEach(([v,t])=>voiceEl.add(new Option(t,v)));
+langEl.value="en-IN"; voiceEl.value="shubh";
+
+const savedKey = localStorage.getItem("voicemint_key");
+if(savedKey){ keyEl.value=savedKey; keyDetails.open=false; }
+else { keyDetails.open=true; }
+keyEl.addEventListener("change",()=>localStorage.setItem("voicemint_key",keyEl.value.trim()));
+
+textEl.addEventListener("input",()=>{
+  cCount.textContent=textEl.value.length;
+  textEl.style.borderColor = textEl.value.length>2500 ? "var(--danger)" : "";
+});
+paceEl.addEventListener("input",()=>paceVal.textContent=Number(paceEl.value).toFixed(1)+"×");
+
+function show(kind,text){
+  msgEl.className="msg "+kind; msgEl.textContent=text;
+  if(kind==="ok") setTimeout(()=>{msgEl.className="msg";},6000);
+}
+
+let currentBlob=null, currentExt="mp3";
+
+function base64ToBlob(b64,mime){
+  const bin=atob(b64); const bytes=new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i);
+  return new Blob([bytes],{type:mime});
+}
+
+function fileName(){
+  const words=textEl.value.trim().toLowerCase().replace(/[^a-z0-9\s]/g,"").split(/\s+/).slice(0,5).join("-");
+  return (words||"voicemint")+"-"+voiceEl.value+"."+currentExt;
+}
+
+async function generate(){
+  const text=textEl.value.trim();
+  const key=keyEl.value.trim();
+  msgEl.className="msg"; resultEl.style.display="none";
+
+  if(!key){ keyDetails.open=true; show("err","Please paste your Sarvam API key first (get a free one at dashboard.sarvam.ai)."); return; }
+  if(!text){ show("err","Please paste or type some text first."); return; }
+  if(text.length>2500){ show("err","Text is too long — the limit is 2500 characters (currently "+text.length+"). Split it into two parts."); return; }
+
+  const body={
+    text:text,
+    target_language_code:langEl.value,
+    speaker:voiceEl.value,
+    model:"bulbul:v3",
+    pace:Number(paceEl.value),
+    speech_sample_rate:Number(rateEl.value),
+    output_audio_codec:fmtEl.value
+  };
+  currentExt=fmtEl.value==="wav"?"wav":"mp3";
+  dlBtn.innerHTML="⬇️ Download "+currentExt.toUpperCase();
+
+  goBtn.disabled=true;
+  goBtn.innerHTML='<span class="spinner"></span>Creating your voice…';
+
+  try{
+    const res=await fetch("https://api.sarvam.ai/text-to-speech",{
+      method:"POST",
+      headers:{"Content-Type":"application/json","api-subscription-key":key},
+      body:JSON.stringify(body)
+    });
+    const data=await res.json().catch(()=>({}));
+    if(!res.ok){
+      if(res.status===401) show("err","Invalid API key. Double-check it at dashboard.sarvam.ai and paste again.");
+      else if(res.status===429) show("err","Rate limit reached — wait a minute and try again.");
+      else show("err",(data.message||data.error&&data.error.message||("Request failed ("+res.status+")")));
+      return;
+    }
+    const b64=data.audios && data.audios[0];
+    if(!b64){ show("err","Unexpected response from the speech API. Please try again."); return; }
+
+    const mime = currentExt==="wav" ? "audio/wav" : "audio/mpeg";
+    currentBlob=base64ToBlob(b64,mime);
+    const url=URL.createObjectURL(currentBlob);
+    player.src=url;
+    player.loop=false;
+    player.style.display="block";
+    resultEl.style.display="block";
+    dlBtn.onclick=()=>{
+      const a=document.createElement("a");
+      a.href=url; a.download=fileName(); a.click();
+    };
+    show("ok","Voice ready — press play to listen, then download your "+currentExt.toUpperCase()+" file.");
+    player.play().catch(()=>{});
+  }catch(err){
+    show("err","Could not reach the speech service. Check your internet connection and try again.");
+  }finally{
+    goBtn.disabled=false;
+    goBtn.innerHTML="🎤 Generate Voice";
+  }
+}
+
+goBtn.addEventListener("click",generate);
+againBtn.addEventListener("click",generate);
+textEl.addEventListener("keydown",e=>{
+  if((e.ctrlKey||e.metaKey)&&e.key==="Enter") generate();
+});
+</script>
+</body>
+</html>
